@@ -7,7 +7,7 @@ A self-hosted photo and video capture application with a modern, containerized a
 - **Multi-User Support**: Secure user registration and login with JWT-based authentication.
 - **Photo and Video Capture**: Capture photos and record videos directly from the browser using the WebRTC and MediaRecorder APIs.
 - **Media Gallery**: View your uploaded photos and videos in a gallery.
-- **Flexible Storage**: Choose between three storage backends:
+- **Storage**: Uses local storage backend:
   - A local Docker volume (default)
 - **Containerized**: The entire application is containerized with Docker and orchestrated with `docker-compose` for easy setup and deployment.
 - **PWA Ready**: The client is a Progressive Web App, allowing it to be "installed" on mobile devices.
