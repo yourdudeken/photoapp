@@ -10,11 +10,6 @@ router.post('/register', async (req, res) => {
   const db = req.app.get('db');
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'missing' });
-  try {
-    await db.raw('SELECT 1');
-  } catch (err) {
-    return res.status(500).json({ error: 'db connection failed' });
-  }
   const hash = await bcrypt.hash(password, 10);
   try {
     const [user] = await db('users').insert({ username, password: hash }).returning(['id','username']);
