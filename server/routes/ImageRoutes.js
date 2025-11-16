@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const Image = require('../models/Image');
+const Image = require('../models/Images');
 const router = express.Router();
 
 const storage = multer.diskStorage({

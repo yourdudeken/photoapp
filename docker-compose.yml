@@ -1,0 +1,82 @@
+version: "3.8"
+services:
+  traefik:
+    image: traefik:v2.11
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=you@example.com
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: photoapp
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+
+  server:
+    build: ./server
+    depends_on: [db]
+    environment:
+      PORT: 5000
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: photoapp
+      STORAGE_TYPE: local         # change to 's3' to use MinIO/S3
+      LOCAL_MEDIA_PATH: /app/media
+      S3_BUCKET: photoapp
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_ENDPOINT: http://minio:9000
+      S3_FORCE_PATH_STYLE: 'true'
+      JWT_SECRET: supersecret
+    volumes:
+      - media_storage:/app/media
+      # optional: mount NAS path (host must mount the NAS to /mnt/nas on host)
+      # - /mnt/nas/photoapp_media:/app/media
+    labels:
+      - "traefik.http.routers.server.rule=Host(`photoapp.example.com`)"
+      - "traefik.http.routers.server.entrypoints=websecure"
+      - "traefik.http.routers.server.tls.certresolver=le"
+
+  client:
+    build: ./client
+    environment:
+      VITE_API_URL: "https://photoapp.example.com"
+    labels:
+      - "traefik.http.routers.client.rule=Host(`photoapp.example.com`)"
+      - "traefik.http.routers.client.entrypoints=websecure"
+      - "traefik.http.routers.client.tls.certresolver=le"
+    depends_on: [server]
+
+volumes:
+  dbdata:
+  minio_data:
+  media_storage:
+  traefik_letsencrypt:
