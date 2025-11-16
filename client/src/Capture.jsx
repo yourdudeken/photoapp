@@ -5,15 +5,18 @@ const Capture = () => {
   const [stream, setStream] = useState(null);
   const [recorder, setRecorder] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [error, setError] = useState('');
   const chunks = useRef([]);
 
   const startCamera = async () => {
+    setError('');
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       setStream(mediaStream);
       videoRef.current.srcObject = mediaStream;
     } catch (error) {
       console.error('Error accessing camera:', error);
+      setError('Could not access the camera. Please check permissions.');
     }
   };
 
@@ -52,31 +55,44 @@ const Capture = () => {
   };
 
   const uploadBlob = async (blob, filename) => {
+    setError('');
     const form = new FormData();
     form.append('media', blob, filename);
     const token = localStorage.getItem('token');
+    if (!token) {
+      setError('You must be logged in to upload media.');
+      return;
+    }
     try {
       const res = await fetch('/api/upload/file', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: form,
       });
-      const data = await res.json();
-      alert(`Upload successful: ${data.filename}`);
+      if (!res.ok) {
+        throw new Error('Upload failed');
+      }
+      await res.json();
+      // Optionally, show a success message
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Upload failed.');
+      setError('Upload failed. Please try again.');
     }
   };
 
   return (
     <div>
       <h2>Capture</h2>
+      {error && <div className="error-message">{error}</div>}
       <video ref={videoRef} autoPlay playsInline muted />
-      <button onClick={startCamera}>Start Camera</button>
-      <button onClick={takePicture}>Take Picture</button>
-      <button onClick={startRecording} disabled={isRecording}>Start Recording</button>
-      <button onClick={stopRecording} disabled={!isRecording}>Stop Recording</button>
+      <div className="capture-buttons">
+        <button onClick={startCamera}>Start Camera</button>
+        <button onClick={takePicture} disabled={!stream}>Take Picture</button>
+        <button onClick={startRecording} disabled={!stream || isRecording}>
+          {isRecording ? 'Recording...' : 'Start Recording'}
+        </button>
+        <button onClick={stopRecording} disabled={!isRecording}>Stop Recording</button>
+      </div>
     </div>
   );
 };

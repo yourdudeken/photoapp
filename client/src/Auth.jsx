@@ -4,9 +4,11 @@ const Auth = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
     try {
       const response = await fetch(endpoint, {
@@ -15,22 +17,24 @@ const Auth = () => {
         body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
-      if (data.token) {
+      if (response.ok && data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        alert('Success!');
+        // Redirect or update UI on success
+        window.location.href = '/capture';
       } else {
-        alert(data.error || 'An error occurred.');
+        setError(data.error || 'An error occurred.');
       }
     } catch (error) {
       console.error('Auth error:', error);
-      alert('An error occurred.');
+      setError('An error occurred.');
     }
   };
 
   return (
     <div>
       <h2>{isLogin ? 'Login' : 'Register'}</h2>
+      {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
         <input
           type="text"

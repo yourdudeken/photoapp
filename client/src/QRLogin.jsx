@@ -3,9 +3,11 @@ import QRCode from 'qrcode';
 
 const QRLogin = () => {
   const [qrUrl, setQrUrl] = useState('');
+  const [error, setError] = useState('');
   const canvasRef = useRef();
 
   const generateQRToken = async () => {
+    setError('');
     // This is a simplified flow. In a real app, you'd get the token
     // from the server and poll for login success.
     const user = JSON.parse(localStorage.getItem('user'));
@@ -13,7 +15,7 @@ const QRLogin = () => {
       const tempToken = `https://photoapp.example.com/qr-login?token=${user.id}-${Date.now()}`;
       setQrUrl(tempToken);
     } else {
-      alert('You must be logged in to generate a QR code.');
+      setError('You must be logged in to generate a QR code.');
     }
   };
 
@@ -28,6 +30,7 @@ const QRLogin = () => {
   return (
     <div>
       <h2>QR Login</h2>
+      {error && <div className="error-message">{error}</div>}
       <button onClick={generateQRToken}>Generate QR Code</button>
       {qrUrl && (
         <div>
