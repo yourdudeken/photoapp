@@ -1,24 +1,5 @@
 version: "3.8"
 services:
-  traefik:
-    image: traefik:v2.11
-    command:
-      - --api.insecure=true
-      - --providers.docker=true
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.le.acme.tlschallenge=true
-      - --certificatesresolvers.le.acme.email=you@example.com
-      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik_letsencrypt:/letsencrypt
-    labels:
-      - "traefik.enable=true"
-
   db:
     image: postgres:15
     environment:
@@ -60,23 +41,16 @@ services:
       - media_storage:/app/media
       # optional: mount NAS path (host must mount the NAS to /mnt/nas on host)
       # - /mnt/nas/photoapp_media:/app/media
-    labels:
-      - "traefik.http.routers.server.rule=Host(`photoapp.example.com`)"
-      - "traefik.http.routers.server.entrypoints=websecure"
-      - "traefik.http.routers.server.tls.certresolver=le"
 
   client:
     build: ./client
+    ports:
+      - "3000:3000"
     environment:
-      VITE_API_URL: "https://photoapp.example.com"
-    labels:
-      - "traefik.http.routers.client.rule=Host(`photoapp.example.com`)"
-      - "traefik.http.routers.client.entrypoints=websecure"
-      - "traefik.http.routers.client.tls.certresolver=le"
+      VITE_API_URL: "http://localhost:5000"
     depends_on: [server]
 
 volumes:
   dbdata:
   minio_data:
   media_storage:
-  traefik_letsencrypt:

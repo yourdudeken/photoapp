@@ -12,7 +12,7 @@ const QRLogin = () => {
     // from the server and poll for login success.
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
-      const tempToken = `https://photoapp.example.com/qr-login?token=${user.id}-${Date.now()}`;
+      const tempToken = `http://localhost:5000/qr-login?token=${user.id}-${Date.now()}`;
       setQrUrl(tempToken);
     } else {
       setError('You must be logged in to generate a QR code.');
