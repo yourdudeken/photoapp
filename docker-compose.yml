@@ -27,8 +27,6 @@ services:
     build: ./client
     ports:
       - "3000:3000"
-    environment:
-      VITE_API_URL: "http://localhost:5000"
     depends_on: [server]
 
 volumes:
