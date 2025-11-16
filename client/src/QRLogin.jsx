@@ -28,16 +28,23 @@ const QRLogin = () => {
   }, [qrUrl]);
 
   return (
-    <div>
-      <h2>QR Login</h2>
-      {error && <div className="error-message">{error}</div>}
-      <button onClick={generateQRToken}>Generate QR Code</button>
-      {qrUrl && (
-        <div>
-          <p>Scan this QR code with your mobile device.</p>
-          <canvas ref={canvasRef} />
+    <div className="page-container">
+      <div className="content-card">
+        <h2>QR Code Login</h2>
+        <p>Generate a QR code to quickly sign in on another device</p>
+        {error && <div className="error-message">{error}</div>}
+        <div className="qr-container">
+          <button onClick={generateQRToken}>Generate QR Code</button>
+          {qrUrl && (
+            <div>
+              <p>Scan this QR code with your mobile device to sign in</p>
+              <div className="qr-code-wrapper">
+                <canvas ref={canvasRef} />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

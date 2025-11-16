@@ -12,13 +12,12 @@ function App() {
       <div className="App">
         <nav>
           <ul>
-            <li><Link to="/auth">Login/Register</Link></li>
+            <li><Link to="/auth">Login</Link></li>
             <li><Link to="/capture">Capture</Link></li>
             <li><Link to="/gallery">Gallery</Link></li>
             <li><Link to="/qr-login">QR Login</Link></li>
           </ul>
         </nav>
-        <hr />
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/capture" element={<Capture />} />
