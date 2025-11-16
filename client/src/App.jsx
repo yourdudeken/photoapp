@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import './App.css';
 import Auth from './Auth';
 import Capture from './Capture';
 import Gallery from './Gallery';
@@ -8,7 +9,7 @@ import QRLogin from './QRLogin';
 function App() {
   return (
     <Router>
-      <div>
+      <div className="App">
         <nav>
           <ul>
             <li><Link to="/auth">Login/Register</Link></li>
