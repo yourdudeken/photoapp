@@ -10,6 +10,8 @@ services:
       - dbdata:/var/lib/postgresql/data
   server:
     build: ./server
+    networks:
+      - photoapp-network
     depends_on: [db]
     environment:
       PORT: 5000
@@ -20,11 +22,15 @@ services:
       STORAGE_TYPE: local
       LOCAL_MEDIA_PATH: /app/media
       JWT_SECRET: 55f2b35553327ef6fa0a4518bcda0065795d5595d8d4f91ad4d6d52ef7ae16ab
+    ports:
+      - "5000:5000"
     volumes:
       - media_storage:/app/media
 
   client:
     build: ./client
+    networks:
+      - photoapp-network
     ports:
       - "3000:3000"
     depends_on: [server]
@@ -32,3 +38,6 @@ services:
 volumes:
   dbdata:
   media_storage:
+
+networks:
+  photoapp-network:
