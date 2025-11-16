@@ -9,9 +9,10 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    const endpoint = isLogin ? 'login' : 'register';
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/${endpoint}`;
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
