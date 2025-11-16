@@ -1,29 +1,14 @@
 {
   "name": "photoapp",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "start": "node server/server.js",
-    "server": "nodemon server/server.js",
-    "client": "npm start --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm run dev -w client & npm run dev -w server"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yourdudeken/photoapp.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/yourdudeken/photoapp/issues"
-  },
-  "homepage": "https://github.com/yourdudeken/photoapp#readme",
-  "dependencies": {},
-  "devDependencies": {
-    "concurrently": "^9.2.1",
-    "nodemon": "^3.1.11"
+  "dependencies": {
+    "knex": "^3.1.0"
   }
 }

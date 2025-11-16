@@ -9,7 +9,7 @@ services:
     volumes:
       - dbdata:/var/lib/postgresql/data
   server:
-    build: ./server
+    build: ../../apps/server
     networks:
       - photoapp-network
     environment:
@@ -27,7 +27,7 @@ services:
       - media_storage:/app/media
 
   client:
-    build: ./client
+    build: ../../apps/web
     networks:
       - photoapp-network
     ports:
