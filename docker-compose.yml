@@ -8,18 +8,6 @@ services:
       POSTGRES_DB: photoapp
     volumes:
       - dbdata:/var/lib/postgresql/data
-
-  minio:
-    image: minio/minio
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data
-    ports:
-      - "9000:9000"
-    volumes:
-      - minio_data:/data
-
   server:
     build: ./server
     depends_on: [db]
@@ -29,18 +17,11 @@ services:
       PGUSER: postgres
       PGPASSWORD: postgres
       PGDATABASE: photoapp
-      STORAGE_TYPE: local         # change to 's3' to use MinIO/S3
+      STORAGE_TYPE: local
       LOCAL_MEDIA_PATH: /app/media
-      S3_BUCKET: photoapp
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
-      S3_ENDPOINT: http://minio:9000
-      S3_FORCE_PATH_STYLE: 'true'
-      JWT_SECRET: supersecret
+      JWT_SECRET: 55f2b35553327ef6fa0a4518bcda0065795d5595d8d4f91ad4d6d52ef7ae16ab
     volumes:
       - media_storage:/app/media
-      # optional: mount NAS path (host must mount the NAS to /mnt/nas on host)
-      # - /mnt/nas/photoapp_media:/app/media
 
   client:
     build: ./client
@@ -52,5 +33,4 @@ services:
 
 volumes:
   dbdata:
-  minio_data:
   media_storage:
