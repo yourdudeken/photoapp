@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import { ToastProvider } from './ToastContext';
@@ -14,7 +14,29 @@ function AppContent() {
   const { theme, toggleTheme } = useTheme();
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')));
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [location]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.user-menu')) {
+        setShowUserMenu(false);
+      }
+      if (!e.target.closest('.mobile-nav') && !e.target.closest('.mobile-menu-button')) {
+        setShowMobileMenu(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -24,25 +46,53 @@ function AppContent() {
     navigate('/auth');
   };
 
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: '🏠', exact: true },
+    { path: '/capture', label: 'Capture', icon: '📷' },
+    { path: '/gallery', label: 'Gallery', icon: '🖼️' },
+    { path: '/qr-login', label: 'QR Login', icon: '📱' },
+  ];
+
   return (
     <div className="App">
       <header className="app-header">
         <div className="header-content">
-          <Link to="/" className="app-logo">
-            <div className="logo-icon">📸</div>
-            <span>PhotoApp</span>
-          </Link>
+          <div className="header-left">
+            {user && (
+              <button
+                className="mobile-menu-button"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                aria-label="Toggle menu"
+              >
+                {showMobileMenu ? '✕' : '☰'}
+              </button>
+            )}
+            <Link to="/" className="app-logo">
+              <div className="logo-icon">📸</div>
+              <span className="logo-text">PhotoApp</span>
+            </Link>
+          </div>
 
           <div className="header-actions">
-            <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              aria-label="Toggle theme"
+            >
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
 
             {user && (
               <div className="user-menu">
-                <button className="user-button" onClick={() => setShowUserMenu(!showUserMenu)}>
+                <button
+                  className="user-button"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label="User menu"
+                >
                   <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
-                  <span>{user.username}</span>
+                  <span className="user-name">{user.username}</span>
+                  <span className="dropdown-arrow">{showUserMenu ? '▲' : '▼'}</span>
                 </button>
                 {showUserMenu && (
                   <div className="user-dropdown">
@@ -61,24 +111,58 @@ function AppContent() {
       </header>
 
       {user && (
-        <nav>
-          <ul>
-            <li><NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''}>🏠 Dashboard</NavLink></li>
-            <li><NavLink to="/capture" className={({ isActive }) => isActive ? 'active' : ''}>📷 Capture</NavLink></li>
-            <li><NavLink to="/gallery" className={({ isActive }) => isActive ? 'active' : ''}>🖼️ Gallery</NavLink></li>
-            <li><NavLink to="/qr-login" className={({ isActive }) => isActive ? 'active' : ''}>📱 QR Login</NavLink></li>
-          </ul>
-        </nav>
+        <>
+          {/* Desktop Navigation */}
+          <nav className="desktop-nav">
+            <ul>
+              {navItems.map((item) => (
+                <li key={item.path}>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) => isActive && (item.exact ? location.pathname === item.path : true) ? 'active' : ''}
+                    end={item.exact}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    <span className="nav-label">{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Mobile Navigation */}
+          <nav className={`mobile-nav ${showMobileMenu ? 'open' : ''}`}>
+            <ul>
+              {navItems.map((item) => (
+                <li key={item.path}>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) => isActive && (item.exact ? location.pathname === item.path : true) ? 'active' : ''}
+                    end={item.exact}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    <span className="nav-label">{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Mobile Menu Overlay */}
+          {showMobileMenu && <div className="mobile-overlay" onClick={() => setShowMobileMenu(false)} />}
+        </>
       )}
 
-      <Routes>
-        <Route path="/auth" element={<Auth onLogin={setUser} />} />
-        <Route path="/capture" element={<Capture />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/qr-login" element={<QRLogin />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/" element={user ? <Dashboard /> : <Auth onLogin={setUser} />} />
-      </Routes>
+      <main className="main-content">
+        <Routes>
+          <Route path="/auth" element={<Auth onLogin={setUser} />} />
+          <Route path="/capture" element={<Capture />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/qr-login" element={<QRLogin />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/" element={user ? <Dashboard /> : <Auth onLogin={setUser} />} />
+        </Routes>
+      </main>
     </div>
   );
 }
