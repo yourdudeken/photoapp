@@ -3,7 +3,7 @@ const path = require('path');
 const AWS = require('aws-sdk');
 
 const STORAGE = process.env.STORAGE_TYPE || 'local'; // 'local'|'s3'
-const LOCAL_PATH = process.env.LOCAL_MEDIA_PATH || '/app/media';
+const LOCAL_PATH = process.env.LOCAL_MEDIA_PATH || './media';
 
 let s3;
 if (STORAGE === 's3') {

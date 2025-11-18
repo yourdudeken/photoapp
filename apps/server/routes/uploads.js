@@ -5,16 +5,16 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const router = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200*1024*1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200 * 1024 * 1024 } });
 
-function authMiddleware(req,res,next){
+function authMiddleware(req, res, next) {
   const header = req.headers.authorization?.split(' ')[1];
-  if(!header) return res.status(401).json({error:'no auth'});
+  if (!header) return res.status(401).json({ error: 'no auth' });
   try {
-    const payload = require('jsonwebtoken').verify(header, process.env.JWT_SECRET || 'change_me');
-    req.userId = payload.sub;
+    const payload = require('jsonwebtoken').verify(header, process.env.JWT_SECRET || '55f2b35553327ef6fa0a4518bcda0065795d5595d8d4f91ad4d6d52ef7ae16ab');
+    req.userId = payload.userId;
     next();
-  } catch(e) { res.status(401).json({error:'invalid'}); }
+  } catch (e) { res.status(401).json({ error: 'invalid' }); }
 }
 
 router.post('/file', authMiddleware, upload.single('media'), async (req, res) => {
@@ -30,7 +30,7 @@ router.post('/file', authMiddleware, upload.single('media'), async (req, res) =>
     content_type: req.file.mimetype,
     storage_type: info.storage,
     s3_key: info.key || null
-  }).returning(['id','filename']);
+  }).returning(['id', 'filename']);
   res.json({ id: rec.id, filename: rec.filename });
 });
 
