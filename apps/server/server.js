@@ -19,10 +19,11 @@ app.use(express.json());
 const db = knex({
   client: 'pg',
   connection: {
-    host: process.env.PGHOST || 'db',
+    host: process.env.PGHOST || 'localhost',
     user: process.env.PGUSER || 'postgres',
     password: process.env.PGPASSWORD || 'postgres',
-    database: process.env.PGDATABASE || 'photoapp'
+    database: process.env.PGDATABASE || 'photoapp',
+    port: process.env.PGPORT || 5432
   }
 });
 app.set('db', db);
@@ -34,7 +35,7 @@ app.use('/api/gallery', galleryRoutes);
 
 // static serving when using local filesystem storage
 if (process.env.STORAGE_TYPE !== 's3') {
-  app.use('/media', express.static(process.env.LOCAL_MEDIA_PATH || '/app/media'));
+  app.use('/media', express.static(process.env.LOCAL_MEDIA_PATH || './media'));
 }
 
 const PORT = process.env.PORT || 5000;
