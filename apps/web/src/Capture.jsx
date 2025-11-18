@@ -47,15 +47,55 @@ const Capture = () => {
   const startRecording = () => {
     if (stream) {
       try {
-        const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: 'video/webm;codecs=vp9'
-        });
+        // Try different codecs for better browser compatibility with audio support
+        let options;
+        let mimeType;
 
-        mediaRecorder.ondataavailable = (e) => chunks.current.push(e.data);
+        // Try codecs that support both video and audio
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+          options = { mimeType: 'video/webm;codecs=vp9,opus' };
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+          options = { mimeType: 'video/webm;codecs=vp8,opus' };
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264,opus')) {
+          options = { mimeType: 'video/webm;codecs=h264,opus' };
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          options = { mimeType: 'video/webm' };
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          options = { mimeType: 'video/mp4' };
+          mimeType = 'video/mp4';
+        } else {
+          // No mimeType specified, let browser choose
+          options = {};
+          mimeType = 'video/webm';
+        }
+
+        console.log('Using codec:', options.mimeType || 'browser default');
+
+        const mediaRecorder = new MediaRecorder(stream, options);
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            chunks.current.push(e.data);
+          }
+        };
+
         mediaRecorder.onstop = async () => {
-          const blob = new Blob(chunks.current, { type: 'video/webm' });
-          chunks.current = [];
-          await uploadBlob(blob, 'video.webm');
+          if (chunks.current.length > 0) {
+            const blob = new Blob(chunks.current, { type: mimeType });
+            chunks.current = [];
+            const extension = mimeType === 'video/mp4' ? 'mp4' : 'webm';
+            await uploadBlob(blob, `video.${extension}`);
+          }
+        };
+
+        mediaRecorder.onerror = (e) => {
+          console.error('MediaRecorder error:', e);
+          showError('Recording error occurred');
+          setIsRecording(false);
         };
 
         setRecorder(mediaRecorder);
@@ -63,7 +103,8 @@ const Capture = () => {
         setIsRecording(true);
         success('Recording started');
       } catch (error) {
-        showError('Failed to start recording');
+        console.error('Failed to start recording:', error);
+        showError(`Failed to start recording: ${error.message}`);
       }
     }
   };
