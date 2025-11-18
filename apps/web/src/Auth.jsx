@@ -1,34 +1,50 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastContext';
 
-const Auth = () => {
+const Auth = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { success, error: showError } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+
     const endpoint = isLogin ? 'login' : 'register';
-    const apiUrl = `${process.env.REACT_APP_API_URL}/api/auth/${endpoint}`;
+    const apiUrl = `${process.env.REACT_APP_API_URL || ''}/api/auth/${endpoint}`;
+
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
+
       const data = await response.json();
+
       if (response.ok && data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        // Redirect or update UI on success
-        window.location.href = '/capture';
+        onLogin(data.user);
+        success(isLogin ? 'Welcome back!' : 'Account created successfully!');
+        navigate('/');
       } else {
         setError(data.error || 'An error occurred.');
+        showError(data.error || 'An error occurred.');
       }
     } catch (error) {
       console.error('Auth error:', error);
-      setError('An error occurred.');
+      const errorMsg = 'Unable to connect to server. Please try again.';
+      setError(errorMsg);
+      showError(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,7 +53,9 @@ const Auth = () => {
       <div className="content-card auth-container">
         <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
         <p>{isLogin ? 'Sign in to access your media library' : 'Sign up to start capturing and storing your memories'}</p>
+
         {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username</label>
@@ -48,8 +66,10 @@ const Auth = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              autoComplete="username"
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -59,10 +79,15 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
             />
           </div>
-          <button type="submit">{isLogin ? 'Sign In' : 'Create Account'}</button>
+
+          <button type="submit" disabled={loading}>
+            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+          </button>
         </form>
+
         <div className="auth-toggle">
           <p>
             {isLogin ? "Don't have an account? " : "Already have an account? "}
