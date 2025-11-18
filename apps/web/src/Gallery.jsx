@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
 import Lightbox from './Lightbox';
@@ -14,15 +14,7 @@ const Gallery = () => {
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
 
-  useEffect(() => {
-    fetchMedia();
-  }, []);
-
-  useEffect(() => {
-    filterMedia();
-  }, [media, filter, searchTerm]);
-
-  const fetchMedia = async () => {
+  const fetchMedia = useCallback(async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       navigate('/auth');
@@ -41,9 +33,9 @@ const Gallery = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate, showError]);
 
-  const filterMedia = () => {
+  const filterMedia = useCallback(() => {
     let filtered = media;
 
     if (filter === 'photos') {
@@ -59,7 +51,15 @@ const Gallery = () => {
     }
 
     setFilteredMedia(filtered);
-  };
+  }, [media, filter, searchTerm]);
+
+  useEffect(() => {
+    fetchMedia();
+  }, [fetchMedia]);
+
+  useEffect(() => {
+    filterMedia();
+  }, [filterMedia]);
 
   const handleDelete = async (itemId, e) => {
     e.stopPropagation();
