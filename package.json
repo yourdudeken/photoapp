@@ -2,13 +2,9 @@
   "name": "photoapp",
   "private": true,
   "workspaces": [
-    "client",
-    "server"
+    "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w client & npm run dev -w server"
-  },
-  "dependencies": {
-    "knex": "^3.1.0"
+    "dev": "npm run dev --workspace=web & npm run dev --workspace=server"
   }
 }
