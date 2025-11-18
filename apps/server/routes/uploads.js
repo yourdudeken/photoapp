@@ -12,7 +12,7 @@ function authMiddleware(req, res, next) {
   if (!header) return res.status(401).json({ error: 'no auth' });
   try {
     const payload = require('jsonwebtoken').verify(header, process.env.JWT_SECRET || '55f2b35553327ef6fa0a4518bcda0065795d5595d8d4f91ad4d6d52ef7ae16ab');
-    req.userId = payload.userId;
+    req.userId = payload.sub;
     next();
   } catch (e) { res.status(401).json({ error: 'invalid' }); }
 }
