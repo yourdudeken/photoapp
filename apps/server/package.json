@@ -16,5 +16,8 @@
     "knex": "^2.4.0",
     "aws-sdk": "^2.1370.0",
     "minio": "^7.0.25"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

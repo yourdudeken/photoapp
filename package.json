@@ -5,6 +5,11 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=web & npm run dev --workspace=server"
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=web\" --names \"server,web\" --prefix-colors \"blue,green\"",
+    "install:all": "npm install && npm install --workspace=server && npm install --workspace=web",
+    "build": "npm run build --workspace=web"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

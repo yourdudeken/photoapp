@@ -6,7 +6,13 @@ const uploadRoutes = require('./routes/uploads');
 const galleryRoutes = require('./routes/gallery');
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3000' }));
+
+// CORS configuration for development and production
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // configure DB (Postgres)

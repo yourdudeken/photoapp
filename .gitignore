@@ -1,2 +1,9 @@
-node_modules
+node_modules/
 .env
+*.log
+.DS_Store
+apps/server/media/*
+!apps/server/media/.gitkeep
+build/
+dist/
+.cache/
