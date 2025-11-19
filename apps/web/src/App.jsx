@@ -132,7 +132,7 @@ function AppContent() {
           </nav>
 
           {/* Mobile Navigation */}
-          <nav className={`mobile - nav ${showMobileMenu ? 'open' : ''} `}>
+          <nav className={`mobile-nav ${showMobileMenu ? 'show' : ''}`}>
             <ul>
               {navItems.map((item) => (
                 <li key={item.path}>
@@ -140,6 +140,7 @@ function AppContent() {
                     to={item.path}
                     className={({ isActive }) => isActive && (item.exact ? location.pathname === item.path : true) ? 'active' : ''}
                     end={item.exact}
+                    onClick={() => setShowMobileMenu(false)}
                   >
                     <span className="nav-icon">{item.icon}</span>
                     <span className="nav-label">{item.label}</span>
