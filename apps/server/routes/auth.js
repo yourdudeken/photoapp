@@ -13,7 +13,12 @@ router.post('/register', async (req, res) => {
   const hash = await bcrypt.hash(password, 10);
   try {
     const [user] = await db('users').insert({ username, password: hash }).returning(['id', 'username']);
-    res.json({ user });
+
+    // Generate token for immediate login after registration
+    const token = jwt.sign({ sub: user.id }, JWT_SECRET, { expiresIn: '15m' });
+    const refresh = jwt.sign({ sub: user.id }, REFRESH_SECRET, { expiresIn: '30d' });
+
+    res.json({ token, refresh, user: { id: user.id, username: user.username } });
   } catch (err) {
     res.status(400).json({ error: 'exists' });
   }
