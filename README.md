@@ -1,55 +1,64 @@
-# PhotoApp
+# PhotoApp 📸
 
-A self-hosted photo and video capture application with a modern, responsive web interface. Built with React, Node.js, Express, and PostgreSQL.
+A modern, self-hosted photo and video capture application with a professional web interface. Built with React, Node.js, Express, PostgreSQL, and Docker.
 
 ## ✨ Features
 
 ### 🎨 Modern UI
-- **Dark/Light Mode**: Toggle between themes with persistence
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Professional Design**: Glassmorphism effects, gradients, and smooth animations
-- **Toast Notifications**: Non-intrusive feedback for user actions
+- **Dark/Light Mode**: Seamless theme switching with localStorage persistence
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Professional Design**: Glassmorphism effects, smooth gradients, and fluid animations
+- **Toast Notifications**: Non-intrusive feedback system for user actions
+- **Hamburger Menu**: Mobile-friendly navigation with click-outside handlers
 
-### 👤 Multi-User Support
-- **Secure Authentication**: JWT-based login and registration
-- **User Dashboard**: Overview of media library with statistics
-- **User Profile Menu**: Easy access to settings and account management
+### 👤 Multi-User Authentication
+- **Secure Registration**: bcrypt password hashing with UUID-based user IDs
+- **JWT Authentication**: Token-based login with 15-minute expiry
+- **Session Management**: Automatic redirect on token expiration
+- **User Profile Menu**: Quick access to settings and logout
 
 ### 📸 Photo Capture
-- **Browser-Based**: Capture photos directly from device camera
-- **Camera Controls**: Flip between front/back cameras (mobile)
-- **Upload Progress**: Real-time progress tracking
+- **Browser-Based Camera**: Direct camera access via MediaDevices API
+- **Camera Controls**: Flip between front/back cameras on mobile devices
+- **Aspect Ratio Selection**: 3:4, 9:16, 1:1, 16:9, 4:3, and Full screen modes
 - **High Quality**: PNG format with original camera resolution
+- **Real-time Upload**: Progress tracking with visual feedback
 
 ### 🎥 Video Recording
-- **Audio + Video**: Records both video and audio
+- **Audio + Video**: Records both video and audio tracks
 - **Codec Auto-Detection**: Automatically selects best supported codec
-- **Supported Formats**: WebM (VP9/VP8 + Opus) or MP4
-- **Upload Progress**: Real-time progress tracking
-- **Max Size**: 200MB per video
+  - VP9 + Opus (best quality, Chrome/Firefox)
+  - VP8 + Opus (good quality, wide support)
+  - H264 + Opus (fallback)
+  - WebM/MP4 (browser default)
+- **Upload Progress**: Real-time progress bar during upload
+- **Large File Support**: Up to 200MB per video
 
-### 🖼️ Enhanced Gallery
+### 🖼️ Gallery Management
+- **Grid Layout**: Responsive 1-4 column layout based on screen size
 - **Search**: Filter media by filename
-- **Filter by Type**: View all, photos only, or videos only
-- **Lightbox Viewer**: Full-screen media viewing
-- **Delete Media**: Remove unwanted items with confirmation
-- **Download Media**: Download photos and videos
-- **Responsive Grid**: Adapts from 1 to 4 columns based on screen size
+- **Type Filters**: View all, photos only, or videos only
+- **Lightbox Viewer**: Full-screen media viewing experience
+- **Download**: Download any photo or video
+- **Delete**: Remove media with confirmation dialog
+- **Lazy Loading**: Efficient image loading
 
-### ⚙️ Settings
+### ⚙️ Settings & Dashboard
+- **Dashboard**: Media statistics and recent uploads preview
 - **Theme Toggle**: Switch between light and dark modes
 - **Account Info**: View username and account details
-- **Logout**: Secure session termination
+- **Secure Logout**: Clear session and redirect to login
 
 ## 🏗️ Architecture
 
 ### Technology Stack
 - **Frontend**: React 18, React Router 7
-- **Backend**: Node.js, Express
-- **Database**: PostgreSQL 15
-- **Storage**: Local filesystem (Docker volume support)
+- **Backend**: Node.js 18, Express
+- **Database**: PostgreSQL 15 with UUID primary keys
+- **Storage**: Local filesystem with Docker volume support
+- **Web Server**: Nginx (production) with reverse proxy
 - **Authentication**: JWT tokens with bcrypt password hashing
-- **Upload**: Multer with FormData
+- **Upload**: Multer with FormData and XMLHttpRequest
 - **Camera**: MediaDevices API
 - **Recording**: MediaRecorder API with codec fallback
 
@@ -57,42 +66,48 @@ A self-hosted photo and video capture application with a modern, responsive web 
 ```
 photoapp/
 ├── apps/
-│   ├── server/              # Backend (Port 5000)
-│   │   ├── server.js        # Express server
+│   ├── server/                      # Backend (Port 5000)
+│   │   ├── server.js               # Express server
 │   │   ├── routes/
-│   │   │   ├── auth.js      # Authentication endpoints
-│   │   │   ├── uploads.js   # Media upload endpoint
-│   │   │   └── gallery.js   # Gallery CRUD endpoints
+│   │   │   ├── auth.js             # Authentication (register/login)
+│   │   │   ├── uploads.js          # Media upload with sanitization
+│   │   │   └── gallery.js          # Gallery CRUD operations
 │   │   ├── storage/
-│   │   │   └── adapter.js   # Storage abstraction layer
+│   │   │   └── adapter.js          # Storage abstraction (local/S3)
 │   │   ├── db/
-│   │   │   └── schema.sql   # Database schema
-│   │   └── media/           # Uploaded files (local dev)
+│   │   │   └── schema.sql          # PostgreSQL schema with UUIDs
+│   │   ├── media/                  # Uploaded files (local dev)
+│   │   ├── package.json
+│   │   └── Dockerfile
 │   │
-│   └── web/                 # Frontend (Port 3000)
+│   └── web/                        # Frontend (Port 3000 dev, 80 prod)
 │       ├── src/
-│       │   ├── App.jsx      # Main app with routing
-│       │   ├── App.css      # Responsive styles
-│       │   ├── Dashboard.jsx
-│       │   ├── Gallery.jsx
-│       │   ├── Capture.jsx
-│       │   ├── Settings.jsx
-│       │   ├── Lightbox.jsx
-│       │   ├── ThemeContext.jsx
-│       │   └── ToastContext.jsx
-│       └── package.json     # Includes proxy config
+│       │   ├── App.jsx             # Main app with routing
+│       │   ├── App.css             # Responsive styles
+│       │   ├── Dashboard.jsx       # Stats dashboard
+│       │   ├── Gallery.jsx         # Media gallery with filters
+│       │   ├── Capture.jsx         # Photo/video capture
+│       │   ├── Settings.jsx        # User settings
+│       │   ├── Lightbox.jsx        # Media viewer
+│       │   ├── ThemeContext.jsx    # Theme management
+│       │   ├── ToastContext.jsx    # Toast notifications
+│       │   └── Auth.jsx            # Login/register
+│       ├── nginx.conf              # Nginx configuration
+│       ├── package.json            # Includes proxy config
+│       └── Dockerfile              # Multi-stage build
 │
-├── docker-compose.yml       # Production deployment
-├── package.json             # Monorepo workspace config
-└── README.md                # This file
+├── docker-compose.yml              # Production deployment
+├── package.json                    # Monorepo workspace config
+├── .env.example                    # Environment variables template
+└── README.md                       # This file
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- Docker & Docker Compose
-- npm or yarn
+- **Node.js** 18 or higher
+- **Docker** and **Docker Compose**
+- **npm** or **yarn**
 
 ### Local Development Setup
 
@@ -107,62 +122,78 @@ photoapp/
    npm install
    ```
 
-3. **Start the database**:
+3. **Set up environment variables** (optional):
+   ```bash
+   cp .env.example .env
+   # Edit .env if needed (defaults work for local dev)
+   ```
+
+4. **Start the database**:
    ```bash
    docker-compose up -d db
    ```
    
    The database will be available at `localhost:5433` (port 5433 to avoid conflicts with local PostgreSQL).
 
-4. **Start development servers**:
+5. **Start development servers**:
    ```bash
    npm run dev
    ```
    
    This starts:
-   - Backend on http://localhost:5000
-   - Frontend on http://localhost:3000
+   - **Backend** on http://localhost:5000
+   - **Frontend** on http://localhost:3000
 
-5. **Open the app**:
+6. **Open the app**:
    Navigate to http://localhost:3000
 
 ### Production Deployment
 
 ```bash
+# Build and start all services
 docker-compose up --build -d
+
+# View logs
+docker logs -f photoapp-web-1
+docker logs -f photoapp-server-1
+
+# Stop all services
+docker-compose down
 ```
 
-This will:
-- Build optimized frontend
-- Start backend server
-- Initialize database automatically
-- Serve on port 80
+**Access the application:**
+- **Production**: http://localhost
+- **Backend API**: http://localhost:5000 (direct) or http://localhost/api (via nginx)
+- **Database**: localhost:5433 (external access)
 
-## 🎯 Usage
+## 🎯 Usage Guide
 
 ### Create Account
-1. Open http://localhost:3000
-2. Click "Sign up"
+1. Open http://localhost (or http://localhost:3000 for dev)
+2. Click **"Sign up"**
 3. Enter username and password
-4. Click "Create Account"
+4. Click **"Create Account"**
+5. You'll be automatically logged in
 
 ### Capture Photos
-1. Navigate to "Capture" page
-2. Click "Start Camera"
-3. Grant camera permission when prompted
-4. Click "Take Picture"
-5. Photo uploads automatically
-6. View in Gallery
+1. Navigate to **"Capture"** page
+2. Select aspect ratio (3:4, 9:16, 1:1, 16:9, 4:3, or Full)
+3. Click **"Start Camera"**
+4. Grant camera permission when prompted
+5. Click **"📷 Take Picture"**
+6. Photo uploads automatically
+7. View in **Gallery**
 
 ### Record Videos
-1. Navigate to "Capture" page
-2. Click "Start Camera"
-3. Grant camera and microphone permissions
-4. Click "Start Recording"
-5. Speak or make noise
-6. Click "Stop Recording"
-7. Video uploads automatically with audio
-8. View and play in Gallery
+1. Navigate to **"Capture"** page
+2. Select aspect ratio
+3. Click **"Start Camera"**
+4. Grant camera and microphone permissions
+5. Click **"🎥 Start Recording"**
+6. Speak or make noise
+7. Click **"⏹️ Stop Recording"**
+8. Video uploads automatically with audio
+9. View and play in **Gallery**
 
 ### Manage Gallery
 - **Search**: Type in search box to filter by filename
@@ -170,89 +201,177 @@ This will:
 - **View**: Click any media to open in lightbox
 - **Download**: Hover and click download button
 - **Delete**: Hover and click delete button (with confirmation)
+- **Navigate**: Use arrow keys or swipe in lightbox
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the root directory (optional, defaults work for local dev):
+Create a `.env` file in the root directory:
 
 ```env
-# Server
+# Server Configuration
 PORT=5000
+
+# Database Configuration (Local Development)
 PGHOST=localhost
 PGUSER=postgres
 PGPASSWORD=postgres
 PGDATABASE=photoapp
 PGPORT=5433
+
+# Database Configuration (Docker Production)
+# PGHOST=db
+# PGPORT=5432
+
+# Storage Configuration
 STORAGE_TYPE=local
 LOCAL_MEDIA_PATH=./media
-JWT_SECRET=your-secret-key-here
 
-# CORS
+# S3 Storage (Optional)
+# STORAGE_TYPE=s3
+# S3_BUCKET=your-bucket
+# S3_ACCESS_KEY=your-key
+# S3_SECRET_KEY=your-secret
+# S3_ENDPOINT=https://s3.amazonaws.com
+# S3_REGION=us-east-1
+
+# Authentication & Security
+# Generate with: openssl rand -hex 32
+JWT_SECRET=55f2b35553327ef6fa0a4518bcda0065795d5595d8d4f91ad4d6d52ef7ae16ab
+REFRESH_SECRET=a8f3c9e2b1d4f7a6e5c8b9d2f3e4a7b6c9d8e7f6a5b4c3d2e1f9a8b7c6d5e4f3
+JWT_EXPIRY=15m
+REFRESH_EXPIRY=30d
+
+# CORS Configuration
 CORS_ORIGIN=http://localhost:3000
+
+# Upload Limits
+MAX_FILE_SIZE=209715200  # 200MB in bytes
+
+# Node Environment
+NODE_ENV=development
 ```
 
-### Database Configuration
+### Database Schema
 
-**Local Development:**
-- Host: localhost
-- Port: 5433 (Docker mapped)
-- Database: photoapp
-- User: postgres
-- Password: postgres
+```sql
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-**Production (Docker):**
-- Host: db (container name)
-- Port: 5432 (internal)
-- Database: photoapp
-- User: postgres
-- Password: postgres
+-- Users table with UUID
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-### Storage Configuration
-
-By default, media is stored locally in `apps/server/media/`. For S3-compatible storage, set:
-
-```env
-STORAGE_TYPE=s3
-S3_BUCKET=your-bucket
-S3_ACCESS_KEY=your-key
-S3_SECRET_KEY=your-secret
-S3_ENDPOINT=https://s3.amazonaws.com
+-- Media table with UUID reference
+CREATE TABLE IF NOT EXISTS media (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  filename VARCHAR(255) NOT NULL,
+  original_name VARCHAR(255),
+  content_type VARCHAR(100),
+  storage_type VARCHAR(50),
+  s3_key VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ## 📡 API Endpoints
 
 ### Authentication
-```
+```http
 POST /api/auth/register
-Body: { "username": "user", "password": "pass" }
-Response: { "user": { "id": 1, "username": "user" } }
+Content-Type: application/json
 
+{
+  "username": "user",
+  "password": "password"
+}
+
+Response: {
+  "token": "jwt-token",
+  "refresh": "refresh-token",
+  "user": { "id": "uuid", "username": "user" }
+}
+```
+
+```http
 POST /api/auth/login
-Body: { "username": "user", "password": "pass" }
-Response: { "token": "jwt-token", "user": {...} }
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "password"
+}
+
+Response: {
+  "token": "jwt-token",
+  "refresh": "refresh-token",
+  "user": { "id": "uuid", "username": "user" }
+}
 ```
 
 ### Media Upload
-```
+```http
 POST /api/upload/file
-Headers: Authorization: Bearer <token>
-Body: FormData with 'media' file
-Response: { "id": 1, "filename": "..." }
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+FormData: { media: File }
+
+Response: {
+  "id": "uuid",
+  "filename": "timestamp-uuid-filename.ext"
+}
 ```
 
 ### Gallery
-```
-GET /api/gallery?userId=<id>
-Response: [{ "id": 1, "filename": "...", "url": "...", ... }]
+```http
+GET /api/gallery?userId=<uuid>
 
+Response: [
+  {
+    "id": "uuid",
+    "filename": "...",
+    "url": "/media/...",
+    "content_type": "image/png",
+    "created_at": "2025-11-19T..."
+  }
+]
+```
+
+```http
 DELETE /api/gallery/:id
-Headers: Authorization: Bearer <token>
-Response: { "success": true }
+Authorization: Bearer <token>
+
+Response: {
+  "success": true,
+  "message": "Media deleted successfully"
+}
 ```
 
 ## 🎨 Features in Detail
+
+### Aspect Ratio Controls
+
+The app provides professional camera-style aspect ratio selection:
+
+- **Portrait Modes**:
+  - 3:4 - Standard portrait photos
+  - 9:16 - Instagram Stories/Reels format
+  - 1:1 - Square format (Instagram posts)
+
+- **Landscape Modes**:
+  - 16:9 - Widescreen (YouTube, modern displays)
+  - 4:3 - Classic TV format
+
+- **Full Screen**: No aspect ratio constraint
+
+Aspect ratio controls appear as an overlay on the video feed when the camera is active, with a professional glassmorphism design.
 
 ### Video Recording Codec Support
 
@@ -273,26 +392,26 @@ The app automatically detects and uses the best supported codec:
 
 ### Dark Mode
 
-- Toggle via header button (🌙/☀️)
-- Toggle via Settings page
-- Persists across sessions
-- Smooth transitions
+- Toggle via header button (🌙/☀️) or Settings page
+- Persists across sessions in localStorage
+- Smooth transitions between themes
 - All components support both themes
 
 ## 🐛 Troubleshooting
 
 ### Port Conflicts
 
-If port 5432 is already in use (local PostgreSQL):
-- The app uses port 5433 for Docker PostgreSQL
-- Update `PGPORT` in server.js if needed
+If port 5432 is already in use by local PostgreSQL:
+- The app uses port **5433** for Docker PostgreSQL
+- Update `PGPORT` in `.env` if needed
 
 ### Camera/Microphone Permissions
 
 If camera or microphone doesn't work:
-1. Check browser permissions
-2. Use HTTPS in production (required for camera API)
+1. Check browser permissions (usually in address bar)
+2. Use **HTTPS** in production (required for camera API)
 3. Grant permissions when prompted
+4. Check system settings for camera/microphone access
 
 ### Video Recording Issues
 
@@ -300,11 +419,31 @@ If camera or microphone doesn't work:
 - Refresh the page
 - Check browser console for codec info
 - Try different browser (Chrome/Firefox recommended)
+- Ensure microphone permission is granted
 
 **No audio in video:**
 - Grant microphone permission
 - Check system microphone settings
 - Verify microphone is not muted
+- Test microphone in system settings
+
+### Upload Failures
+
+**401 Unauthorized:**
+- Logout and login again
+- Token may have expired (15-minute expiry)
+- Clear browser cache and cookies
+
+**413 Request Entity Too Large:**
+- File exceeds 200MB limit
+- Nginx `client_max_body_size` is configured to 200M
+- Check video length and quality settings
+
+**404 Not Found (for uploaded media):**
+- Refresh the browser (hard refresh: Ctrl+Shift+R)
+- Clear browser cache
+- Check that files exist: `docker exec photoapp-server-1 ls -lh /media/`
+- Restart server: `docker-compose restart server`
 
 ### Database Connection Issues
 
@@ -317,49 +456,52 @@ docker-compose logs db
 
 # Restart database
 docker-compose restart db
+
+# Connect to database
+docker exec -it photoapp-db-1 psql -U postgres -d photoapp
 ```
 
-### Upload Failures
+### File System Issues
 
 ```bash
-# Check media directory exists
-ls -la apps/server/media/
+# Check media directory
+docker exec photoapp-server-1 ls -lh /media/
 
-# Create if missing
-mkdir -p apps/server/media
-chmod 755 apps/server/media
+# Check volume
+docker volume inspect photoapp_media
+
+# Create media directory if missing
+docker exec photoapp-server-1 mkdir -p /media
+docker exec photoapp-server-1 chmod 755 /media
 ```
 
-## 🔒 Security
+## 🔒 Security Features
 
-- **Password Hashing**: bcrypt with salt rounds
-- **JWT Authentication**: Secure token-based auth
-- **CORS**: Configured for allowed origins
-- **Input Validation**: Server-side validation
-- **File Size Limits**: 200MB max upload
+- **Password Hashing**: bcrypt with automatic salt generation
+- **UUID Primary Keys**: Non-sequential, non-guessable user IDs
+- **JWT Authentication**: Secure token-based auth with expiry
+- **Authorization**: Token verification on protected routes
 - **User Isolation**: Users can only access their own media
+- **CORS**: Configured for allowed origins only
+- **Input Validation**: Server-side validation and sanitization
+- **Filename Sanitization**: Removes trailing spaces and special characters
+- **File Size Limits**: 200MB max upload
+- **SQL Injection Protection**: Parameterized queries via Knex
 
-## 📊 Database Schema
+## 📊 Performance
 
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  username VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+### Optimizations
+- **Lazy Loading**: Images load as needed
+- **Efficient React Hooks**: useCallback for stable references
+- **Optimized CSS**: CSS variables and minimal re-renders
+- **Progress Tracking**: Real-time upload feedback
+- **Nginx Caching**: Static assets cached for 1 year
+- **Gzip Compression**: Enabled for text-based assets
 
-CREATE TABLE media (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  filename VARCHAR(255) NOT NULL,
-  original_name VARCHAR(255),
-  content_type VARCHAR(100),
-  storage_type VARCHAR(50),
-  s3_key VARCHAR(255),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
+### File Sizes
+- **Photos**: ~100KB - 5MB (depends on camera resolution)
+- **Videos**: ~1MB - 200MB (depends on length and quality)
+- **Frontend Bundle**: ~500KB (production build, gzipped)
 
 ## 🚧 Development
 
@@ -388,11 +530,29 @@ npm test --workspace=server
 ### Building for Production
 
 ```bash
-# Build frontend
+# Build frontend only
 npm run build --workspace=web
 
-# Or use Docker
-docker-compose up --build
+# Build and deploy with Docker
+docker-compose up --build -d
+```
+
+### Database Management
+
+```bash
+# Access database
+docker exec -it photoapp-db-1 psql -U postgres -d photoapp
+
+# Run SQL commands
+\dt                    # List tables
+\d users              # Describe users table
+SELECT * FROM users;  # Query users
+
+# Backup database
+docker exec photoapp-db-1 pg_dump -U postgres photoapp > backup.sql
+
+# Restore database
+docker exec -i photoapp-db-1 psql -U postgres photoapp < backup.sql
 ```
 
 ## 📝 License
@@ -403,10 +563,32 @@ MIT License - see LICENSE file for details
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
 ## 📧 Support
 
 For issues and questions, please open an issue on GitHub.
 
+## 🎓 Learning Outcomes
+
+This project demonstrates:
+- Full-stack React + Node.js development
+- JWT authentication implementation
+- MediaDevices and MediaRecorder APIs
+- Responsive CSS design with dark mode
+- Docker containerization and multi-stage builds
+- PostgreSQL database design with UUIDs
+- File upload handling with progress tracking
+- Real-time progress tracking with XMLHttpRequest
+- Theme management with Context API
+- Monorepo architecture with npm workspaces
+- Nginx reverse proxy configuration
+- Production deployment with Docker Compose
+
 ---
 
-**Made with ❤️ by the PhotoApp team**
+**Made with ❤️ using React, Node.js, Express, PostgreSQL, and Docker**
