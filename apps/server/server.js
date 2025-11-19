@@ -35,7 +35,17 @@ app.use('/api/gallery', galleryRoutes);
 
 // static serving when using local filesystem storage
 if (process.env.STORAGE_TYPE !== 's3') {
-  app.use('/media', express.static(process.env.LOCAL_MEDIA_PATH || './media'));
+  const mediaPath = process.env.LOCAL_MEDIA_PATH || './media';
+  console.log(`Setting up static file serving from: ${mediaPath}`);
+  console.log(`Resolved path: ${require('path').resolve(mediaPath)}`);
+  app.use('/media', express.static(mediaPath));
+
+  // Debug middleware to log media requests
+  app.use('/media', (req, res, next) => {
+    console.log(`Media request: ${req.url}`);
+    console.log(`Full path would be: ${require('path').join(mediaPath, req.url)}`);
+    next();
+  });
 }
 
 const PORT = process.env.PORT || 5000;

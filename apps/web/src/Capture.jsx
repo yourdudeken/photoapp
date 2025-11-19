@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
 
 const Capture = () => {
-  const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [recorder, setRecorder] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [facingMode, setFacingMode] = useState('user');
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [facingMode, setFacingMode] = useState('user');
+  const [aspectRatio, setAspectRatio] = useState('full'); // full, 3:4, 9:16, 1:1, 16:9, 4:3
+  const videoRef = useRef(null);
   const chunks = useRef([]);
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
@@ -88,7 +89,7 @@ const Capture = () => {
             const blob = new Blob(chunks.current, { type: mimeType });
             chunks.current = [];
             const extension = mimeType === 'video/mp4' ? 'mp4' : 'webm';
-            await uploadBlob(blob, `video.${extension}`);
+            await uploadBlob(blob, `video.${extension} `);
           }
         };
 
@@ -104,7 +105,7 @@ const Capture = () => {
         success('Recording started');
       } catch (error) {
         console.error('Failed to start recording:', error);
-        showError(`Failed to start recording: ${error.message}`);
+        showError(`Failed to start recording: ${error.message} `);
       }
     }
   };
@@ -141,6 +142,7 @@ const Capture = () => {
     if (!token) {
       showError('You must be logged in to upload media.');
       setIsUploading(false);
+      navigate('/auth');
       return;
     }
 
@@ -162,13 +164,19 @@ const Capture = () => {
             setIsUploading(false);
             setUploadProgress(0);
           }, 1000);
+        } else if (xhr.status === 401) {
+          showError('Session expired. Please login again.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/auth');
+          setIsUploading(false);
         } else {
-          throw new Error('Upload failed');
+          throw new Error(`Upload failed with status ${xhr.status}`);
         }
       });
 
       xhr.addEventListener('error', () => {
-        throw new Error('Upload failed');
+        throw new Error('Network error during upload');
       });
 
       xhr.open('POST', '/api/upload/file');
@@ -193,6 +201,18 @@ const Capture = () => {
     }
   };
 
+  // Get aspect ratio class for video container
+  const getAspectRatioClass = () => {
+    switch (aspectRatio) {
+      case '3:4': return 'aspect-3-4';
+      case '9:16': return 'aspect-9-16';
+      case '1:1': return 'aspect-1-1';
+      case '16:9': return 'aspect-16-9';
+      case '4:3': return 'aspect-4-3';
+      default: return 'aspect-full';
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="content-card">
@@ -200,8 +220,64 @@ const Capture = () => {
         <p>Take photos or record videos using your device camera</p>
 
         <div className="capture-container">
-          <div className="video-container">
+          <div className={`video-container ${getAspectRatioClass()}`}>
             <video ref={videoRef} autoPlay playsInline muted />
+
+            {/* Aspect Ratio Controls - Only visible when camera is active */}
+            {stream && (
+              <div className="aspect-ratio-overlay">
+                <div className="aspect-ratio-selector">
+                  <button
+                    onClick={() => setAspectRatio('3:4')}
+                    className={aspectRatio === '3:4' ? 'active' : ''}
+                    disabled={isRecording || isUploading}
+                    title="Portrait 3:4"
+                  >
+                    3:4
+                  </button>
+                  <button
+                    onClick={() => setAspectRatio('9:16')}
+                    className={aspectRatio === '9:16' ? 'active' : ''}
+                    disabled={isRecording || isUploading}
+                    title="Stories 9:16"
+                  >
+                    9:16
+                  </button>
+                  <button
+                    onClick={() => setAspectRatio('1:1')}
+                    className={aspectRatio === '1:1' ? 'active' : ''}
+                    disabled={isRecording || isUploading}
+                    title="Square 1:1"
+                  >
+                    1:1
+                  </button>
+                  <button
+                    onClick={() => setAspectRatio('16:9')}
+                    className={aspectRatio === '16:9' ? 'active' : ''}
+                    disabled={isRecording || isUploading}
+                    title="Widescreen 16:9"
+                  >
+                    16:9
+                  </button>
+                  <button
+                    onClick={() => setAspectRatio('4:3')}
+                    className={aspectRatio === '4:3' ? 'active' : ''}
+                    disabled={isRecording || isUploading}
+                    title="Classic 4:3"
+                  >
+                    4:3
+                  </button>
+                  <button
+                    onClick={() => setAspectRatio('full')}
+                    className={aspectRatio === 'full' ? 'active' : ''}
+                    disabled={isRecording || isUploading}
+                    title="Full Screen"
+                  >
+                    Full
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="capture-buttons">
@@ -258,7 +334,7 @@ const Capture = () => {
               <div className="progress-bar">
                 <div
                   className="progress-fill"
-                  style={{ width: `${uploadProgress}%` }}
+                  style={{ width: `${uploadProgress}% ` }}
                 />
               </div>
               <div className="progress-text">

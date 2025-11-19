@@ -19,7 +19,11 @@ function authMiddleware(req, res, next) {
 
 router.post('/file', authMiddleware, upload.single('media'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'no file' });
-  const filename = Date.now() + '-' + uuidv4() + (req.file.originalname ? ('-' + req.file.originalname) : '');
+
+  // Sanitize original filename - remove trailing spaces and special characters
+  const originalName = req.file.originalname ? req.file.originalname.trim().replace(/\s+/g, '-') : '';
+  const filename = `${Date.now()}-${uuidv4()}${originalName ? '-' + originalName : ''}`;
+
   const info = await adapter.save(req.file.buffer, filename, req.file.mimetype);
   // store metadata
   const db = req.app.get('db');
