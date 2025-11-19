@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
+import './QRCode.css';
 import { ThemeProvider, useTheme } from './ThemeContext';
-import { ToastProvider } from './ToastContext';
+import { ToastProvider, useToast } from './ToastContext';
 import Auth from './Auth';
 import Capture from './Capture';
 import Gallery from './Gallery';
@@ -131,7 +132,7 @@ function AppContent() {
           </nav>
 
           {/* Mobile Navigation */}
-          <nav className={`mobile-nav ${showMobileMenu ? 'open' : ''}`}>
+          <nav className={`mobile - nav ${showMobileMenu ? 'open' : ''} `}>
             <ul>
               {navItems.map((item) => (
                 <li key={item.path}>
@@ -158,7 +159,7 @@ function AppContent() {
           <Route path="/auth" element={<Auth onLogin={setUser} />} />
           <Route path="/capture" element={<Capture />} />
           <Route path="/gallery" element={<Gallery />} />
-          <Route path="/qr-login" element={<QRLogin />} />
+          <Route path="/qr-login" element={<QRLogin onLogin={setUser} />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/" element={user ? <Dashboard /> : <Auth onLogin={setUser} />} />
         </Routes>

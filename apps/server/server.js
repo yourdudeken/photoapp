@@ -4,6 +4,7 @@ const knex = require('knex');
 const authRoutes = require('./routes/auth');
 const uploadRoutes = require('./routes/uploads');
 const galleryRoutes = require('./routes/gallery');
+const qrAuthRoutes = require('./routes/qr-auth');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.set('db', db);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/gallery', galleryRoutes);
+app.use('/api/qr-auth', qrAuthRoutes);
 
 // static serving when using local filesystem storage
 if (process.env.STORAGE_TYPE !== 's3') {
