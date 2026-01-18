@@ -59,20 +59,7 @@ function AppContent() {
             </span>
           </div>
           <div className="top-bar-right">
-            <button 
-              className={`theme-toggle-switch ${theme}`} 
-              onClick={toggleTheme}
-              aria-label="Toggle Theme"
-            >
-              <div className="toggle-track">
-                <span className="toggle-icon sun"><Icons.Sun /></span>
-                <span className="toggle-icon moon"><Icons.Moon /></span>
-                <div className="toggle-thumb" />
-              </div>
-            </button>
-            <div className="user-indicator">
-              <Icons.User />
-            </div>
+            {/* Theme and User moved to Settings/Menu page */}
           </div>
         </header>
       )}
