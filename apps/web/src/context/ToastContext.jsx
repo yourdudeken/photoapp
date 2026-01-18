@@ -39,9 +39,9 @@ export const ToastProvider = ({ children }) => {
                 {toasts.map(toast => (
                     <div key={toast.id} className={`toast ${toast.type}`}>
                         <div className="toast-icon">
-                            {toast.type === 'success' && '✓'}
-                            {toast.type === 'error' && '✕'}
-                            {toast.type === 'info' && 'ℹ'}
+                            {toast.type === 'success' && 'Success'}
+                            {toast.type === 'error' && 'Error'}
+                            {toast.type === 'info' && 'Info'}
                         </div>
                         <div className="toast-content">
                             <div className="toast-message">{toast.message}</div>

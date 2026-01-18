@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import './App.css';
-import './QRCode.css';
-import { ThemeProvider, useTheme } from './ThemeContext';
-import { ToastProvider, useToast } from './ToastContext';
-import Auth from './Auth';
-import Capture from './Capture';
-import Gallery from './Gallery';
-import QRLogin from './QRLogin';
-import Dashboard from './Dashboard';
-import Settings from './Settings';
+import './styles/App.css';
+import './styles/QRCode.css';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ToastProvider, useToast } from './context/ToastContext';
+import Auth from './pages/Auth';
+import Capture from './pages/Capture';
+import Gallery from './pages/Gallery';
+import QRLogin from './pages/QRLogin';
+import Dashboard from './pages/Dashboard';
+import Settings from './pages/Settings';
 
 function AppContent() {
   const { theme, toggleTheme } = useTheme();
@@ -48,10 +48,10 @@ function AppContent() {
   };
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: '🏠', exact: true },
-    { path: '/capture', label: 'Capture', icon: '📷' },
-    { path: '/gallery', label: 'Gallery', icon: '🖼️' },
-    { path: '/qr-login', label: 'QR Login', icon: '📱' },
+    { path: '/', label: 'Dashboard', icon: '', exact: true },
+    { path: '/capture', label: 'Capture', icon: '' },
+    { path: '/gallery', label: 'Gallery', icon: '' },
+    { path: '/qr-login', label: 'QR Login', icon: '' },
   ];
 
   return (
@@ -65,11 +65,10 @@ function AppContent() {
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 aria-label="Toggle menu"
               >
-                {showMobileMenu ? '✕' : '☰'}
+                {showMobileMenu ? 'Close' : 'Menu'}
               </button>
             )}
             <Link to="/" className="app-logo">
-              <div className="logo-icon">📸</div>
               <span className="logo-text">PhotoApp</span>
             </Link>
           </div>
@@ -81,7 +80,7 @@ function AppContent() {
               title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
               aria-label="Toggle theme"
             >
-              {theme === 'light' ? '🌙' : '☀️'}
+              {theme === 'light' ? 'Dark' : 'Light'}
             </button>
 
             {user && (
@@ -93,15 +92,15 @@ function AppContent() {
                 >
                   <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
                   <span className="user-name">{user.username}</span>
-                  <span className="dropdown-arrow">{showUserMenu ? '▲' : '▼'}</span>
+                  <span className="dropdown-arrow">{showUserMenu ? '^' : 'v'}</span>
                 </button>
                 {showUserMenu && (
                   <div className="user-dropdown">
                     <button onClick={() => { navigate('/settings'); setShowUserMenu(false); }}>
-                      ⚙️ Settings
+                      Settings
                     </button>
                     <button onClick={handleLogout} className="danger">
-                      🚪 Logout
+                      Logout
                     </button>
                   </div>
                 )}
@@ -123,7 +122,6 @@ function AppContent() {
                     className={({ isActive }) => isActive && (item.exact ? location.pathname === item.path : true) ? 'active' : ''}
                     end={item.exact}
                   >
-                    <span className="nav-icon">{item.icon}</span>
                     <span className="nav-label">{item.label}</span>
                   </NavLink>
                 </li>
@@ -142,7 +140,6 @@ function AppContent() {
                     end={item.exact}
                     onClick={() => setShowMobileMenu(false)}
                   >
-                    <span className="nav-icon">{item.icon}</span>
                     <span className="nav-label">{item.label}</span>
                   </NavLink>
                 </li>

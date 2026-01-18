@@ -12,7 +12,7 @@ const Lightbox = ({ media, onClose }) => {
     return (
         <div className="lightbox" onClick={handleBackdropClick}>
             <button className="lightbox-close" onClick={onClose}>
-                ✕
+                &times;
             </button>
             <div className="lightbox-content">
                 {media.content_type.startsWith('video') ? (

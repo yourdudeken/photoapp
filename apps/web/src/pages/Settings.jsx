@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTheme } from './ThemeContext';
-import { useToast } from './ToastContext';
+import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
@@ -44,7 +44,7 @@ const Settings = () => {
                     <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <label style={{ marginBottom: 0 }}>Theme</label>
                         <button onClick={toggleTheme} className="secondary">
-                            {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
                         </button>
                     </div>
                 </div>
