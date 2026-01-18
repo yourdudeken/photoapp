@@ -49,24 +49,30 @@ const Auth = ({ onLogin }) => {
     };
 
     return (
-        <div className="page-container">
-            <div className="content-card auth-container">
-                <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-                <p>{isLogin ? 'Sign in to access your media library' : 'Sign up to start capturing and storing your memories'}</p>
+        <div className="page-container auth-page">
+            <div className="auth-card">
+                <div className="auth-header">
+                    <div className="auth-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <h2>{isLogin ? 'Welcome Back' : 'Join PhotoApp'}</h2>
+                    <p>{isLogin ? 'Enter your credentials to access your gallery' : 'Create your account to start capturing memories'}</p>
+                </div>
 
-                {error && <div className="error-message">{error}</div>}
+                {error && <div className="error-banner">{error}</div>}
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
                         <label htmlFor="username">Username</label>
                         <input
                             id="username"
                             type="text"
-                            placeholder="Enter your username"
+                            placeholder="Type your username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             autoComplete="username"
+                            className="input-field"
                         />
                     </div>
 
@@ -75,24 +81,25 @@ const Auth = ({ onLogin }) => {
                         <input
                             id="password"
                             type="password"
-                            placeholder="Enter your password"
+                            placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             autoComplete={isLogin ? 'current-password' : 'new-password'}
+                            className="input-field"
                         />
                     </div>
 
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+                    <button type="submit" disabled={loading} className="primary-btn full-width">
+                        {loading ? <span className="loader" /> : (isLogin ? 'Sign In' : 'Create Account')}
                     </button>
                 </form>
 
-                <div className="auth-toggle">
+                <div className="auth-footer">
                     <p>
-                        {isLogin ? "Don't have an account? " : "Already have an account? "}
-                        <button onClick={() => setIsLogin(!isLogin)}>
-                            {isLogin ? 'Sign up' : 'Sign in'}
+                        {isLogin ? "New here? " : "Already have an account? "}
+                        <button onClick={() => setIsLogin(!isLogin)} className="link-btn">
+                            {isLogin ? 'Create Account' : 'Sign In'}
                         </button>
                     </p>
                 </div>

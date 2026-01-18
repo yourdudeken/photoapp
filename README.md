@@ -437,9 +437,11 @@ If camera or microphone doesn't work:
 ### Upload Failures
 
 **401 Unauthorized:**
-- Logout and login again
-- Token may have expired (15-minute expiry)
+- **Cause**: Security token has expired (default is 15 minutes) or server secret changed.
+- **Fix**: Log out completely and sign in again.
+- **Dev Tip**: Increase `JWT_EXPIRY` in `.env` to `24h` for longer sessions.
 - Clear browser cache and cookies
+
 
 **413 Request Entity Too Large:**
 - File exceeds 200MB limit

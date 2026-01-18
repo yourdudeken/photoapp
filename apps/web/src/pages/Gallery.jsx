@@ -26,7 +26,9 @@ const Gallery = () => {
             if (!response.ok) throw new Error('Failed to fetch media');
 
             const data = await response.json();
-            setMedia(data);
+            // Sort by newest first
+            const sorted = data.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            setMedia(sorted);
         } catch (err) {
             setError(err.message);
             showError('Failed to load gallery');
@@ -35,7 +37,7 @@ const Gallery = () => {
         }
     }, [navigate, showError]);
 
-    const filterMedia = useCallback(() => {
+    useEffect(() => {
         let filtered = media;
 
         if (filter === 'photos') {
@@ -57,16 +59,9 @@ const Gallery = () => {
         fetchMedia();
     }, [fetchMedia]);
 
-    useEffect(() => {
-        filterMedia();
-    }, [filterMedia]);
-
     const handleDelete = async (itemId, e) => {
         e.stopPropagation();
-
-        if (!window.confirm('Are you sure you want to delete this item?')) {
-            return;
-        }
+        if (!window.confirm('Delete this item?')) return;
 
         const token = localStorage.getItem('token');
         try {
@@ -78,15 +73,16 @@ const Gallery = () => {
             if (!response.ok) throw new Error('Failed to delete');
 
             setMedia(prev => prev.filter(item => item.id !== itemId));
-            success('Media deleted successfully');
+            // Close lightbox if open on deleted item
+            if (selectedMedia?.id === itemId) setSelectedMedia(null);
+            success('Deleted');
         } catch (err) {
-            showError('Failed to delete media');
+            showError('Failed to delete');
         }
     };
 
     const handleDownload = async (item, e) => {
         e.stopPropagation();
-
         try {
             const response = await fetch(item.url);
             const blob = await response.blob();
@@ -98,100 +94,102 @@ const Gallery = () => {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            success('Download started');
+            success('Downloading...');
         } catch (err) {
-            showError('Failed to download media');
+            showError('Download failed');
         }
     };
 
     return (
-        <div className="page-container">
-            <div className="content-card">
-                <div className="gallery-header">
-                    <div>
-                        <h2>Media Gallery</h2>
-                        <p>View and manage your captured photos and videos</p>
-                    </div>
-
-                    <div className="gallery-filters">
-                        <div className="filter-group">
+        <div className="page-container gallery-page">
+            <div className="gallery-layout">
+                <div className="gallery-sticky-header">
+                    <div className="header-top">
+                        <div className="search-bar">
                             <input
                                 type="search"
-                                placeholder="Search media..."
+                                placeholder="Search memories..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ minWidth: '200px' }}
                             />
                         </div>
+                    </div>
 
-                        <div className="view-toggle">
+                    <div className="filter-pills">
+                        {['all', 'photos', 'videos'].map(f => (
                             <button
-                                className={filter === 'all' ? 'active' : ''}
-                                onClick={() => setFilter('all')}
+                                key={f}
+                                className={`filter-pill ${filter === f ? 'active' : ''}`}
+                                onClick={() => setFilter(f)}
                             >
-                                All
+                                {f.charAt(0).toUpperCase() + f.slice(1)}
                             </button>
-                            <button
-                                className={filter === 'photos' ? 'active' : ''}
-                                onClick={() => setFilter('photos')}
-                            >
-                                Photos
-                            </button>
-                            <button
-                                className={filter === 'videos' ? 'active' : ''}
-                                onClick={() => setFilter('videos')}
-                            >
-                                Videos
-                            </button>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
-                {error && <div className="error-message">{error}</div>}
+                {error && <div className="error-banner">{error}</div>}
 
                 {loading ? (
-                    <div className="spinner"></div>
+                    <div className="loading-grid">
+                        {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="skeleton-item" />)}
+                    </div>
                 ) : filteredMedia.length === 0 ? (
-                    <div className="gallery-empty">
-                        <h3>No media found</h3>
-                        <p>
-                            {searchTerm || filter !== 'all'
-                                ? 'Try adjusting your filters or search term'
-                                : 'Start capturing photos and videos to see them here'}
-                        </p>
-                        {!searchTerm && filter === 'all' && (
-                            <button onClick={() => navigate('/capture')} style={{ marginTop: '20px' }}>
-                                Start Capturing
-                            </button>
-                        )}
+                    <div className="empty-state">
+                        <div className="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        </div>
+                        <h3>No Memories Yet</h3>
+                        <p>Capture your first photo or video to get started</p>
+                        <button onClick={() => navigate('/capture')} className="primary-btn">
+                            Open Camera
+                        </button>
                     </div>
                 ) : (
-                    <div className="gallery-container">
-                        <div className="gallery-grid">
-                            {filteredMedia.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="gallery-item"
-                                    onClick={() => setSelectedMedia(item)}
-                                >
+                    <div className="masonry-grid">
+                        {filteredMedia.map((item) => (
+                            <div
+                                key={item.id}
+                                className="media-card"
+                                onClick={() => setSelectedMedia(item)}
+                            >
+                                <div className="media-wrapper">
                                     {item.content_type.startsWith('video') ? (
-                                        <video src={item.url} />
-                                    ) : (
-                                        <img src={item.url} alt={item.original_name} />
-                                    )}
-                                    <div className="gallery-overlay">
-                                        <div className="gallery-actions">
-                                            <button onClick={(e) => handleDownload(item, e)}>
-                                                Download
-                                            </button>
-                                            <button onClick={(e) => handleDelete(item.id, e)} className="danger">
-                                                Delete
-                                            </button>
+                                        <div className="video-thumbnail">
+                                            <video src={item.url} preload="metadata" />
+                                            <div className="play-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                            </div>
                                         </div>
+                                    ) : (
+                                        <img src={item.url} alt={item.original_name} loading="lazy" />
+                                    )}
+                                </div>
+                                <div className="media-overlay">
+                                    <div className="overlay-actions">
+                                        <button
+                                            onClick={(e) => handleDownload(item, e)}
+                                            title="Download"
+                                            className="icon-btn"
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDelete(item.id, e)}
+                                            title="Delete"
+                                            className="icon-btn danger"
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                        </button>
+                                    </div>
+                                    <div className="overlay-info">
+                                        <span className="date">
+                                            {new Date(item.created_at).toLocaleDateString()}
+                                        </span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
